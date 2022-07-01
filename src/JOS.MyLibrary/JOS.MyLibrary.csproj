@@ -13,11 +13,13 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Data\data.json" />
-    <EmbeddedResource Include="my-json-file.json" />
+    <EmbeddedResource Include="my-json-file.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="6.0.2" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="6.0.6" />
   </ItemGroup>
 
 </Project>
