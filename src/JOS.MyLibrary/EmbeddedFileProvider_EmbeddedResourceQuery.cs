@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Microsoft.Extensions.FileProviders;
@@ -7,11 +8,20 @@ namespace JOS.MyLibrary
 {
     public class EmbeddedFileProvider_EmbeddedResourceQuery : IEmbeddedResourceQuery
     {
-        private static readonly Dictionary<Assembly, EmbeddedFileProvider> FileProviders;
+        private readonly Dictionary<Assembly, EmbeddedFileProvider> _fileProviders;
 
-        static EmbeddedFileProvider_EmbeddedResourceQuery()
+        public EmbeddedFileProvider_EmbeddedResourceQuery() : this(Array.Empty<Assembly>())
         {
-            FileProviders = new Dictionary<Assembly, EmbeddedFileProvider>();
+        }
+
+        public EmbeddedFileProvider_EmbeddedResourceQuery(IEnumerable<Assembly> assembliesToPreload)
+        {
+            _fileProviders = new Dictionary<Assembly, EmbeddedFileProvider>();
+            foreach (var assembly in assembliesToPreload)
+            {
+                var embeddedFileProvider = new EmbeddedFileProvider(assembly);
+                _fileProviders.Add(assembly, embeddedFileProvider);
+            }
         }
 
         public Stream? Read<T>(string resource)
@@ -30,14 +40,14 @@ namespace JOS.MyLibrary
             return ReadInternal(assembly, resource);
         }
 
-        internal static Stream? ReadInternal(Assembly assembly, string resource)
+        internal Stream? ReadInternal(Assembly assembly, string resource)
         {
-            if (!FileProviders.ContainsKey(assembly))
+            if (!_fileProviders.ContainsKey(assembly))
             {
-                FileProviders[assembly] = new EmbeddedFileProvider(assembly);
+                _fileProviders[assembly] = new EmbeddedFileProvider(assembly);
             }
             
-            return FileProviders[assembly].GetFileInfo(resource).CreateReadStream();
+            return _fileProviders[assembly].GetFileInfo(resource).CreateReadStream();
         }
     }
 }

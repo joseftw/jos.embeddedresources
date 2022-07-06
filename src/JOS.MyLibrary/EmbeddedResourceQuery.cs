@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
@@ -6,11 +7,20 @@ namespace JOS.MyLibrary
 {
     public class EmbeddedResourceQuery : IEmbeddedResourceQuery
     {
-        private static readonly Dictionary<Assembly, string> AssemblyNames;
+        private readonly Dictionary<Assembly, string> _assemblyNames;
 
-        static EmbeddedResourceQuery()
+        public EmbeddedResourceQuery() : this(Array.Empty<Assembly>())
         {
-            AssemblyNames = new Dictionary<Assembly, string>();
+            
+        }
+
+        public EmbeddedResourceQuery(IEnumerable<Assembly> assembliesToPreload)
+        {
+            _assemblyNames = new Dictionary<Assembly, string>();
+            foreach (var assembly in assembliesToPreload)
+            {
+                _assemblyNames.Add(assembly, assembly.GetName().Name!);
+            }
         }
 
         public Stream? Read<T>(string resource)
@@ -30,13 +40,13 @@ namespace JOS.MyLibrary
             return ReadInternal(assembly, resource);
         }
 
-        internal static Stream? ReadInternal(Assembly assembly, string resource)
+        internal Stream? ReadInternal(Assembly assembly, string resource)
         {
-            if (!AssemblyNames.ContainsKey(assembly))
+            if (!_assemblyNames.ContainsKey(assembly))
             {
-                AssemblyNames[assembly] = assembly.GetName().Name!;
+                _assemblyNames[assembly] = assembly.GetName().Name!;
             }
-            return assembly.GetManifestResourceStream($"{AssemblyNames[assembly]}.{resource}");
+            return assembly.GetManifestResourceStream($"{_assemblyNames[assembly]}.{resource}");
         }
     }
 }

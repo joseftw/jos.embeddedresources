@@ -14,8 +14,10 @@ namespace JOS.MyLibrary.Benchmarks
 
         public EmbeddedResourceQueryBenchmark()
         {
-            _embeddedResourceQuery = new EmbeddedResourceQuery();
-            _embeddedFileProviderEmbeddedResourceQuery = new EmbeddedFileProvider_EmbeddedResourceQuery();
+            var assembliesToPreload = new List<Assembly> {Assembly.Load("JOS.MyLibrary")};
+            _embeddedResourceQuery = new EmbeddedResourceQuery(assembliesToPreload);
+            _embeddedFileProviderEmbeddedResourceQuery =
+                new EmbeddedFileProvider_EmbeddedResourceQuery(assembliesToPreload);
         }
 
         [Benchmark(Baseline = true)]
